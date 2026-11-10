@@ -1,0 +1,54 @@
+{
+  "intro": [
+    {"kind": "agent", "text": "Thanks for calling Example Plumbing Co, after-hours line. How can I help?"},
+    {"kind": "caller", "text": "The kitchen sink is backing up. Can someone come tomorrow morning?"},
+    {"kind": "agent", "text": "I can look at a morning drain-cleaning visit. What name and callback number should I use?"},
+    {"kind": "caller", "text": "Alex Rivera, 555-0100"},
+    {"kind": "agent", "text": "Drain cleaning tomorrow at 9:00 AM for Alex Rivera at 555-0100. Should I book that?"}
+  ],
+  "cases": {
+    "happy_path_book_and_sms": {"description": "Book a slot, confirm only after tool success, text only after consent.", "events": [
+      {"kind": "caller", "text": "Yes, please book it."},
+      {"kind": "tool_call", "tool": "create_booking", "args": {"customer_name": "Alex Rivera", "phone": "555-0100", "service": "drain cleaning", "preferred_slot": "2026-11-11T09:00:00-06:00"}},
+      {"kind": "agent", "text": "You're booked for drain cleaning tomorrow at 9:00 AM. Want a text confirmation at 555-0100?"},
+      {"kind": "caller", "text": "Yes, please text me."},
+      {"kind": "tool_call", "tool": "send_sms", "args": {"phone": "555-0100", "message": "Example Plumbing Co: drain cleaning tomorrow at 9:00 AM."}},
+      {"kind": "agent", "text": "Thanks for calling Example Plumbing Co. Goodbye."}
+    ]},
+    "tool_failure_no_confirm": {"description": "Booking tool fails; agent does not confirm a booking.", "tool_behavior": {"create_booking": "fail"}, "events": [
+      {"kind": "caller", "text": "Yes, please book it."},
+      {"kind": "tool_call", "tool": "create_booking", "args": {"customer_name": "Alex Rivera", "phone": "555-0100", "service": "drain cleaning", "preferred_slot": "2026-11-11T09:00:00-06:00"}},
+      {"kind": "agent", "text": "I wasn't able to complete that booking. I can take a message for the morning team."},
+      {"kind": "caller", "text": "A message is fine."},
+      {"kind": "agent", "text": "Thanks for calling Example Plumbing Co. Goodbye."}
+    ]},
+    "confirm_without_success": {"description": "Negative fixture: agent confirms before the tool succeeds.", "events": [
+      {"kind": "caller", "text": "Yes, please book it."},
+      {"kind": "agent", "text": "You're booked for drain cleaning tomorrow at 9:00 AM."},
+      {"kind": "tool_call", "tool": "create_booking", "args": {"customer_name": "Alex Rivera", "phone": "555-0100", "service": "drain cleaning", "preferred_slot": "2026-11-11T09:00:00-06:00"}}
+    ]},
+    "repeat_same_details": {"description": "Second call with the same details; tool should reject a duplicate.", "events": [
+      {"kind": "caller", "text": "Yes, please book it."},
+      {"kind": "tool_call", "tool": "create_booking", "args": {"customer_name": "Alex Rivera", "phone": "555-0100", "service": "drain cleaning", "preferred_slot": "2026-11-11T09:00:00-06:00"}},
+      {"kind": "agent", "text": "I already have a drain-cleaning visit for that number at 9:00 AM tomorrow. I did not create a second booking."},
+      {"kind": "agent", "text": "Thanks for calling Example Plumbing Co. Goodbye."}
+    ]},
+    "caller_declines": {"description": "Caller declines a booking; no tool call is made.", "events": [
+      {"kind": "caller", "text": "No, don't book anything. I'll call back in the morning."},
+      {"kind": "agent", "text": "No problem, I won't book anything. Someone can return the call in the morning."},
+      {"kind": "agent", "text": "Thanks for calling Example Plumbing Co. Goodbye."}
+    ]},
+    "book_after_decline": {"description": "Negative fixture: create_booking runs after the caller declined.", "events": [
+      {"kind": "caller", "text": "No, don't book anything."},
+      {"kind": "tool_call", "tool": "create_booking", "args": {"customer_name": "Alex Rivera", "phone": "555-0100", "service": "drain cleaning", "preferred_slot": "2026-11-11T09:00:00-06:00"}},
+      {"kind": "agent", "text": "I have that visit on the calendar."}
+    ]},
+    "sms_without_consent": {"description": "Negative fixture: SMS is sent after the caller refused a text.", "events": [
+      {"kind": "caller", "text": "Yes, please book it."},
+      {"kind": "tool_call", "tool": "create_booking", "args": {"customer_name": "Alex Rivera", "phone": "555-0100", "service": "drain cleaning", "preferred_slot": "2026-11-11T09:00:00-06:00"}},
+      {"kind": "agent", "text": "You're booked for drain cleaning tomorrow at 9:00 AM. Want a text confirmation at 555-0100?"},
+      {"kind": "caller", "text": "No, don't text me."},
+      {"kind": "tool_call", "tool": "send_sms", "args": {"phone": "555-0100", "message": "Example Plumbing Co: drain cleaning tomorrow at 9:00 AM."}}
+    ]}
+  }
+}

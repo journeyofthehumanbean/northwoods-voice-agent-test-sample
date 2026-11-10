@@ -1,0 +1,14 @@
+{
+  "event": "booking.created",
+  "source": "sample-voice-agent",
+  "company": "Example Plumbing Co",
+  "booking": {
+    "booking_id": "bk_sample_001",
+    "customer_name": "Alex Rivera",
+    "phone": "555-0100",
+    "service": "drain cleaning",
+    "preferred_slot": "2026-11-11T09:00:00-06:00",
+    "sms_consent": true
+  },
+  "note": "Sample payload only. There is no live webhook endpoint in this repo. A real scenario tool would receive this body on its webhook module."
+}

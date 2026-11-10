@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "flow_id": "sample_example_plumbing_co",
+  "name": "Example Plumbing Co after-hours booking",
+  "company": "Example Plumbing Co",
+  "disclaimer": "Fictional sample company and flow. Not a real client. Sample data only.",
+  "timezone": "America/Chicago",
+  "tools": [
+    {"name": "create_booking", "params": ["customer_name", "phone", "service", "preferred_slot"], "idempotency_key": ["phone", "preferred_slot", "service"]},
+    {"name": "send_sms", "params": ["phone", "message"], "requires": "explicit_sms_consent"}
+  ],
+  "policy": [
+    {"id": "never_confirm_booking_unless_tool_success", "summary": "Do not tell the caller they are booked unless create_booking returned success."},
+    {"id": "no_duplicate_booking_for_same_details", "summary": "The same phone, service, and slot must not create a second booking."},
+    {"id": "do_not_book_if_caller_declines", "summary": "If the caller declines, do not call create_booking."},
+    {"id": "sms_only_after_explicit_consent", "summary": "Call send_sms only after the caller clearly agrees to a text."}
+  ],
+  "states": [
+    {"id": "greet", "on_enter_say": "Thanks for calling Example Plumbing Co, after-hours line. How can I help?"},
+    {"id": "collect_details", "collect": ["need", "name", "phone", "preferred_slot"]},
+    {"id": "offer_booking", "on_enter_say": "I can book a visit for that service at the time we discussed. Should I book that?"},
+    {"id": "create_booking", "tool": "create_booking", "next_on_success": "confirm_booking", "next_on_failure": "booking_failed"},
+    {"id": "confirm_booking", "note": "Speak a confirmation only after create_booking returns success.", "on_enter_say": "You're booked for the visit we discussed."},
+    {"id": "booking_failed", "on_enter_say": "I wasn't able to complete that booking. I can take a message for the morning team."},
+    {"id": "ask_sms_consent", "on_enter_say": "Want a text confirmation at the callback number?"},
+    {"id": "send_sms", "tool": "send_sms", "requires": "explicit_sms_consent"},
+    {"id": "close", "on_enter_say": "Thanks for calling Example Plumbing Co. Goodbye."}
+  ]
+}
